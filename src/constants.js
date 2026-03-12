@@ -8,13 +8,13 @@ export const TRAM_HEIGHT = 35
 export const TRAM_X = 80
 
 // Physics
-export const GRAVITY = 0.45
-export const FLAP_VELOCITY = -7.5
-export const MAX_FALL_SPEED = 10
+export const GRAVITY = 0.25
+export const FLAP_VELOCITY = -5.5
+export const MAX_FALL_SPEED = 7
 
 // Obstacles
 export const PIPE_WIDTH = 52
-export const PIPE_GAP_BASE = 150
+export const PIPE_GAP_BASE = 180
 export const PIPE_GAP_MIN = 115
 export const PIPE_SPEED_BASE = 2.5
 export const PIPE_SPEED_MAX = 4.5

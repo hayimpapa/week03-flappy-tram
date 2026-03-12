@@ -128,6 +128,9 @@ export default function Game() {
     }
   }, [])
 
+  const restartTriggerRef = useRef(0)
+  const [restartTrigger, setRestartTrigger] = useState(0)
+
   const restart = useCallback(() => {
     resetGame()
     gameStateRef.current = GAME_STATES.IDLE
@@ -139,6 +142,9 @@ export default function Game() {
       scrollX: 0,
       frameCount: 0,
     })
+    // Bump restart trigger to re-run the game loop useEffect
+    restartTriggerRef.current++
+    setRestartTrigger(restartTriggerRef.current)
   }, [resetGame])
 
   // Game loop
@@ -257,7 +263,7 @@ export default function Game() {
     return () => {
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current)
     }
-  }, [getCurrentDifficulty, handleGameOver, spawnObstacle])
+  }, [getCurrentDifficulty, handleGameOver, spawnObstacle, restartTrigger])
 
   // Input handlers
   useEffect(() => {
