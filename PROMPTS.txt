@@ -1,0 +1,140 @@
+## Week 3 - Flappy Tram - Initial Prompt
+
+Build "Flappy Tram" — a Flappy Bird clone
+set in Melbourne, Australia.
+This is Week 3 of "52 apps in 52 weeks
+before I turn 52" by Hey I'm Papa.
+
+Standalone React app, own GitHub repo,
+deployable to Vercel.
+
+CONCEPT:
+The player controls a Melbourne tram
+flying through the city skyline.
+Obstacles are tram stops / poles the
+tram must fly between.
+Pastel illustrated art style throughout.
+Fun and charming, not dark or gritty.
+
+CONTROLS:
+- Desktop: UP arrow key to flap/rise,
+  tram falls with gravity otherwise
+- Mobile: Tap anywhere on screen to flap
+- Space bar also triggers flap on desktop
+- Game starts on first flap/tap
+
+GAME MECHANICS:
+- Standard Flappy Bird physics:
+  gravity pulls tram down continuously,
+  each flap gives upward velocity impulse
+- Obstacles: pairs of vertical tram poles/
+  stops with a gap between them, scrolling
+  left continuously
+- Gap size should be fair but challenging
+- Score increments each time tram passes
+  through a gap
+- Collision with poles or ground = game over
+- Game over screen shows score, high score,
+  and restart button
+- High score saved to localStorage
+
+VISUALS - draw everything as SVG or
+Canvas elements, no external image files:
+
+Background (parallax layers,
+slower layers move slower):
+Layer 1 - Sky gradient:
+  soft pastel pink to lavender
+Layer 2 - Distant Melbourne skyline:
+  Eureka Tower, Rialto, Arts Centre spire,
+  drawn as simple flat pastel silhouettes
+  in soft purple/mauve
+Layer 3 - Flinders Street Station:
+  iconic facade with clocks and dome,
+  flat pastel illustration in warm yellow/
+  cream tones, closer and larger
+Layer 4 - Ground:
+  cobblestone or tram track strip
+  in warm grey/tan
+
+The Tram (player character):
+- Classic Melbourne W-class tram shape
+  seen from the side
+- Green and yellow pastel colours
+- Slight rotation based on velocity
+  (nose up when rising, nose down falling)
+- Small animation: wheels spin,
+  pantograph bounces
+
+Obstacles:
+- Vertical tram stop poles in pastel teal
+- Small "STOP" sign on top
+- Come in pairs with gap between
+
+UI elements:
+- Score displayed top centre in clean
+  round font
+- High score top right
+- Start screen: "Flappy Tram" title,
+  "Tap or press Space to start" subtitle,
+  pastel illustrated tram bouncing gently
+
+AUDIO (optional, implement if straightforward):
+- A soft "ding" sound on flap
+  (like tram bell)
+- A gentle collision sound on game over
+- No background music needed
+Use the Web Audio API to generate simple
+tones rather than external audio files
+
+DIFFICULTY SCALING:
+- Scrolling speed gradually increases
+  every 10 points
+- Gap size slightly decreases every
+  20 points
+- Cap difficulty at a reasonable maximum
+
+ABOUT THIS BUILD PAGE:
+Standard second tab "About This Build":
+- The Problem
+- The Approach
+- The Prompt
+- What Got Built
+- What I'd Do Differently
+- GitHub Link
+All editable, saved to localStorage.
+
+Pre-populate with:
+- Problem: "Melbourne deserves its own
+  Flappy Bird. Also I wanted to see if
+  a complete browser game could be built
+  in one week with no game dev background."
+- Approach: "React with SVG/Canvas rendering,
+  Web Audio API for sound, everything drawn
+  in code so no external assets needed."
+
+DESIGN:
+- Pastel palette throughout:
+  pinks, lavenders, soft yellows,
+  warm greens, muted teals
+- Charming and Melbourne-proud
+- Works on both desktop and mobile browsers
+- Google Analytics GA4 tracking included
+- After building provide plain English
+  GA4 activation instructions
+
+ADDITIONAL FILES:
+
+1. PROMPTS.txt
+   Paste this full prompt inside, labelled:
+   "## Week 3 - Flappy Tram - Initial Prompt"
+
+2. README.md
+   Include:
+   - App name and description
+   - Week number and project context
+   - How to run locally
+   - Note that all visuals are
+     code-generated, no external assets
+   - Reference to PROMPTS.txt
+   - GitHub: https://github.com/hayimpapa
