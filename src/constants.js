@@ -14,8 +14,8 @@ export const MAX_FALL_SPEED = 5.5
 
 // Obstacles
 export const PIPE_WIDTH = 52
-export const PIPE_GAP_BASE = 180
-export const PIPE_GAP_MIN = 115
+export const PIPE_GAP_BASE = 195
+export const PIPE_GAP_MIN = 130
 export const PIPE_SPEED_BASE = 2.0
 export const PIPE_SPEED_MAX = 4.5
 export const PIPE_SPACING = 220
