@@ -149,11 +149,18 @@ export default function Game() {
 
   // Game loop
   useEffect(() => {
+    const TARGET_FRAME_MS = 1000 / 60 // normalize to 60fps
+
     const gameLoop = (timestamp) => {
+      // Calculate delta time factor (1.0 at 60fps, 0.5 at 120fps, etc.)
+      const elapsed = lastTimeRef.current ? timestamp - lastTimeRef.current : TARGET_FRAME_MS
+      lastTimeRef.current = timestamp
+      const dt = Math.min(elapsed / TARGET_FRAME_MS, 3) // cap at 3x to avoid spiral of death
+
       if (gameStateRef.current !== GAME_STATES.PLAYING) {
         // Idle animation
         if (gameStateRef.current === GAME_STATES.IDLE) {
-          frameCountRef.current++
+          frameCountRef.current += dt
           const bobY = GAME_HEIGHT / 2 - TRAM_HEIGHT / 2 + Math.sin(frameCountRef.current * 0.05) * 8
           setDisplayState({
             tramY: bobY,
@@ -167,19 +174,19 @@ export default function Game() {
         return
       }
 
-      frameCountRef.current++
+      frameCountRef.current += dt
 
-      // Physics
-      velocityRef.current = Math.min(velocityRef.current + GRAVITY, MAX_FALL_SPEED)
-      tramYRef.current += velocityRef.current
+      // Physics - normalized to 60fps
+      velocityRef.current = Math.min(velocityRef.current + GRAVITY * dt, MAX_FALL_SPEED)
+      tramYRef.current += velocityRef.current * dt
 
       const { speed, gap } = getCurrentDifficulty()
-      scrollXRef.current += speed
+      scrollXRef.current += speed * dt
 
       // Move obstacles
       const obs = obstaclesRef.current
       for (let i = 0; i < obs.length; i++) {
-        obs[i].x -= speed
+        obs[i].x -= speed * dt
       }
 
       // Score
