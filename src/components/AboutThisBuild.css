@@ -33,13 +33,6 @@
   border-radius: 10px;
   padding: 18px 20px;
   margin-bottom: 16px;
-  cursor: pointer;
-  transition: border-color 0.2s, background 0.2s;
-}
-
-.about-section:hover {
-  border-color: rgba(255, 255, 255, 0.15);
-  background: rgba(255, 255, 255, 0.08);
 }
 
 .about-section h3 {
@@ -54,66 +47,32 @@
   color: #d0d0e0;
   font-size: 15px;
   line-height: 1.6;
-  white-space: pre-wrap;
 }
 
-.about-placeholder {
-  color: #666680;
-  font-style: italic;
+.about-link {
+  color: #b8b8d0;
+  font-size: 15px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.2s;
 }
 
-.about-textarea {
-  width: 100%;
-  min-height: 80px;
-  padding: 10px 12px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 6px;
-  background: rgba(0, 0, 0, 0.3);
-  color: #d0d0e0;
-  font-size: 14px;
-  font-family: inherit;
-  line-height: 1.5;
-  resize: vertical;
+.about-link:hover {
+  color: #f0d0e8;
 }
 
-.about-textarea:focus {
-  outline: none;
-  border-color: #d4a0c0;
-}
-
-.about-btn-row {
-  display: flex;
-  gap: 10px;
-  margin-top: 10px;
-}
-
-.about-btn {
-  padding: 6px 18px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 13px;
+.about-github-btn {
+  display: inline-block;
+  padding: 10px 24px;
+  background: #7ab87a;
+  color: white;
+  font-size: 15px;
   font-weight: 600;
+  border-radius: 8px;
+  text-decoration: none;
   transition: opacity 0.2s;
 }
 
-.about-btn.save {
-  background: #7ab87a;
-  color: white;
-}
-
-.about-btn.cancel {
-  background: rgba(255, 255, 255, 0.1);
-  color: #b8b8d0;
-}
-
-.about-btn:hover {
+.about-github-btn:hover {
   opacity: 0.85;
-}
-
-.about-footer {
-  text-align: center;
-  margin-top: 24px;
-  color: #666680;
-  font-size: 12px;
 }
