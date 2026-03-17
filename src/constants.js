@@ -29,6 +29,13 @@ export const SPEED_INCREASE_AMOUNT = 0.15
 export const GAP_DECREASE_INTERVAL = 20
 export const GAP_DECREASE_AMOUNT = 5
 
+// Milestone speed bonuses (applied after passing these scores)
+export const SPEED_MILESTONES = [
+  { score: 20, bonus: 0.3 },
+  { score: 40, bonus: 0.3 },
+  { score: 60, bonus: 0.3 },
+]
+
 // Colors
 export const COLORS = {
   skyTop: '#f8c8dc',
