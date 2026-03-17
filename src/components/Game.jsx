@@ -10,6 +10,7 @@ import {
   PIPE_SPACING, GROUND_HEIGHT,
   SPEED_INCREASE_INTERVAL, SPEED_INCREASE_AMOUNT,
   GAP_DECREASE_INTERVAL, GAP_DECREASE_AMOUNT,
+  SPEED_MILESTONES,
 } from '../constants.js'
 import './Game.css'
 
@@ -64,9 +65,13 @@ export default function Game() {
 
   const getCurrentDifficulty = useCallback(() => {
     const s = scoreRef.current
+    let milestoneBonus = 0
+    for (const m of SPEED_MILESTONES) {
+      if (s > m.score) milestoneBonus += m.bonus
+    }
     const speed = Math.min(
       PIPE_SPEED_MAX,
-      PIPE_SPEED_BASE + Math.floor(s / SPEED_INCREASE_INTERVAL) * SPEED_INCREASE_AMOUNT
+      PIPE_SPEED_BASE + Math.floor(s / SPEED_INCREASE_INTERVAL) * SPEED_INCREASE_AMOUNT + milestoneBonus
     )
     const gap = Math.max(
       PIPE_GAP_MIN,
