@@ -23,3 +23,31 @@
 .restart-btn:hover {
   opacity: 0.85;
 }
+
+.leaderboard-input {
+  width: 120px;
+  height: 24px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(107, 184, 176, 0.5);
+  border-radius: 5px;
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  outline: none;
+  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  box-sizing: border-box;
+  padding: 0 4px;
+}
+
+.leaderboard-input::placeholder {
+  color: rgba(255, 255, 255, 0.35);
+  letter-spacing: 3px;
+}
+
+.leaderboard-input:focus {
+  border-color: #6bb8b0;
+  background: rgba(255, 255, 255, 0.18);
+}

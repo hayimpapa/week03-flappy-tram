@@ -23,6 +23,10 @@ function setHighScore(s) {
   try { localStorage.setItem('flappyTramHighScore', String(s)) } catch {}
 }
 
+function capScore(s) {
+  return Math.min(s, 99999)
+}
+
 export default function Game() {
   const [containerSize, setContainerSize] = useState({ width: 400, height: 600 })
   const containerRef = useRef(null)
@@ -38,6 +42,15 @@ export default function Game() {
     scrollX: 0,
     frameCount: 0,
   })
+
+  // Leaderboard state
+  const [leaderboard, setLeaderboard] = useState(null)
+  const [leaderboardError, setLeaderboardError] = useState(false)
+  const [leaderboardLoading, setLeaderboardLoading] = useState(false)
+  const [qualifies, setQualifies] = useState(false)
+  const [nameInput, setNameInput] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [submitted, setSubmitted] = useState(false)
 
   const tramYRef = useRef(GAME_HEIGHT / 2 - TRAM_HEIGHT / 2)
   const velocityRef = useRef(0)
@@ -62,6 +75,51 @@ export default function Game() {
     window.addEventListener('resize', updateSize)
     return () => window.removeEventListener('resize', updateSize)
   }, [])
+
+  const fetchLeaderboard = useCallback(async (playerScore) => {
+    setLeaderboardLoading(true)
+    setLeaderboardError(false)
+    try {
+      const res = await fetch('/api/scores')
+      if (!res.ok) throw new Error('Failed to fetch')
+      const data = await res.json()
+      setLeaderboard(data)
+      const qualifiesForBoard = data.length < 10 || playerScore > data[data.length - 1].score
+      setQualifies(qualifiesForBoard)
+    } catch {
+      setLeaderboardError(true)
+      setQualifies(false)
+    } finally {
+      setLeaderboardLoading(false)
+    }
+  }, [])
+
+  const submitScore = useCallback(async () => {
+    if (!nameInput.trim() || submitting) return
+    setSubmitting(true)
+    try {
+      const res = await fetch('/api/scores', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: nameInput.trim().substring(0, 5).toUpperCase().replace(/\s/g, ''),
+          score: capScore(scoreRef.current),
+        }),
+      })
+      if (!res.ok) throw new Error('Failed to submit')
+      setSubmitted(true)
+      // Refresh leaderboard
+      const refreshRes = await fetch('/api/scores')
+      if (refreshRes.ok) {
+        const data = await refreshRes.json()
+        setLeaderboard(data)
+      }
+    } catch {
+      setLeaderboardError(true)
+    } finally {
+      setSubmitting(false)
+    }
+  }, [nameInput, submitting])
 
   const getCurrentDifficulty = useCallback(() => {
     const s = scoreRef.current
@@ -131,7 +189,14 @@ export default function Game() {
       cancelAnimationFrame(animFrameRef.current)
       animFrameRef.current = null
     }
-  }, [])
+    // Reset leaderboard state and fetch
+    setLeaderboard(null)
+    setLeaderboardError(false)
+    setQualifies(false)
+    setNameInput('')
+    setSubmitted(false)
+    fetchLeaderboard(finalScore)
+  }, [fetchLeaderboard])
 
   const restartTriggerRef = useRef(0)
   const [restartTrigger, setRestartTrigger] = useState(0)
@@ -147,6 +212,12 @@ export default function Game() {
       scrollX: 0,
       frameCount: 0,
     })
+    // Reset leaderboard state
+    setLeaderboard(null)
+    setLeaderboardError(false)
+    setQualifies(false)
+    setNameInput('')
+    setSubmitted(false)
     // Bump restart trigger to re-run the game loop useEffect
     restartTriggerRef.current++
     setRestartTrigger(restartTriggerRef.current)
@@ -296,15 +367,27 @@ export default function Game() {
   const handleTap = useCallback((e) => {
     e.preventDefault()
     if (gameStateRef.current === GAME_STATES.GAME_OVER) {
-      restart()
-    } else {
-      flap()
+      // Don't restart on tap if interacting with leaderboard UI
+      return
     }
-  }, [flap, restart])
+    flap()
+  }, [flap])
+
+  const handleRestartClick = useCallback((e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    restart()
+  }, [restart])
 
   const scale = Math.min(containerSize.width / GAME_WIDTH, containerSize.height / GAME_HEIGHT)
   const scaledW = GAME_WIDTH * scale
   const scaledH = GAME_HEIGHT * scale
+
+  // Leaderboard panel dimensions
+  const panelX = GAME_WIDTH / 2 - 150
+  const panelW = 300
+  const panelY = 60
+  const panelH = 480
 
   return (
     <div
@@ -346,7 +429,7 @@ export default function Game() {
               strokeWidth="2"
               paintOrder="stroke"
             >
-              {score}
+              {capScore(score)}
             </text>
             <text
               x={GAME_WIDTH - 10} y={30}
@@ -355,7 +438,7 @@ export default function Game() {
               fontSize="14"
               fontWeight="bold"
             >
-              Best: {highScore}
+              Best: {capScore(highScore)}
             </text>
           </>
         )}
@@ -399,59 +482,223 @@ export default function Game() {
                 fill="rgba(255,255,255,0.5)"
                 fontSize="13"
               >
-                High Score: {highScore}
+                High Score: {capScore(highScore)}
               </text>
             )}
           </g>
         )}
 
-        {/* Game over screen */}
+        {/* Game over screen with leaderboard */}
         {gameState === GAME_STATES.GAME_OVER && (
           <g>
-            <rect x={GAME_WIDTH / 2 - 110} y={150} width={220} height={200} rx="15" fill="rgba(40,30,60,0.85)" />
+            {/* Panel background */}
+            <rect x={panelX} y={panelY} width={panelW} height={panelH} rx="15" fill="rgba(40,30,60,0.92)" />
+
+            {/* Game Over title */}
             <text
-              x={GAME_WIDTH / 2} y={190}
+              x={GAME_WIDTH / 2} y={panelY + 32}
               textAnchor="middle"
               fill="#f0d0e8"
-              fontSize="26"
+              fontSize="24"
               fontWeight="bold"
             >
               Game Over
             </text>
+
+            {/* Score */}
             <text
-              x={GAME_WIDTH / 2} y={230}
+              x={GAME_WIDTH / 2} y={panelY + 60}
               textAnchor="middle"
               fill="white"
               fontSize="16"
             >
-              Score: {score}
+              Score: {capScore(score)}
             </text>
             <text
-              x={GAME_WIDTH / 2} y={260}
+              x={GAME_WIDTH / 2} y={panelY + 80}
               textAnchor="middle"
               fill="rgba(255,255,255,0.7)"
-              fontSize="14"
+              fontSize="13"
             >
-              Best: {Math.max(highScore, score)}
+              Best: {capScore(Math.max(highScore, score))}
             </text>
+
+            {/* Leaderboard section */}
+            {leaderboardLoading && (
+              <text
+                x={GAME_WIDTH / 2} y={panelY + 120}
+                textAnchor="middle"
+                fill="rgba(255,255,255,0.6)"
+                fontSize="13"
+              >
+                Loading leaderboard...
+              </text>
+            )}
+
+            {leaderboardError && !leaderboard && (
+              <text
+                x={GAME_WIDTH / 2} y={panelY + 120}
+                textAnchor="middle"
+                fill="rgba(255,200,200,0.8)"
+                fontSize="13"
+              >
+                Leaderboard unavailable
+              </text>
+            )}
+
+            {/* Name entry for qualifying scores */}
+            {qualifies && !submitted && !leaderboardLoading && !leaderboardError && (
+              <g>
+                <text
+                  x={GAME_WIDTH / 2} y={panelY + 108}
+                  textAnchor="middle"
+                  fill="#e8c840"
+                  fontSize="13"
+                  fontWeight="bold"
+                >
+                  You made the top 10!
+                </text>
+                <foreignObject
+                  x={GAME_WIDTH / 2 - 95}
+                  y={panelY + 114}
+                  width={130}
+                  height={28}
+                >
+                  <input
+                    xmlns="http://www.w3.org/1999/xhtml"
+                    type="text"
+                    maxLength={5}
+                    value={nameInput}
+                    onChange={(e) => {
+                      const val = e.target.value.toUpperCase().replace(/\s/g, '').substring(0, 5)
+                      setNameInput(val)
+                    }}
+                    onKeyDown={(e) => e.stopPropagation()}
+                    onMouseDown={(e) => e.stopPropagation()}
+                    onTouchStart={(e) => e.stopPropagation()}
+                    placeholder="NAME"
+                    className="leaderboard-input"
+                  />
+                </foreignObject>
+                <rect
+                  x={GAME_WIDTH / 2 + 40}
+                  y={panelY + 115}
+                  width={56}
+                  height={26}
+                  rx="6"
+                  fill={submitting ? '#5a8a5a' : '#7ab87a'}
+                  className="restart-btn"
+                  onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); submitScore() }}
+                  onTouchStart={(e) => { e.preventDefault(); e.stopPropagation(); submitScore() }}
+                />
+                <text
+                  x={GAME_WIDTH / 2 + 68}
+                  y={panelY + 133}
+                  textAnchor="middle"
+                  fill="white"
+                  fontSize="12"
+                  fontWeight="bold"
+                  pointerEvents="none"
+                >
+                  {submitting ? '...' : 'Submit'}
+                </text>
+              </g>
+            )}
+
+            {/* Leaderboard table */}
+            {leaderboard && leaderboard.length > 0 && (
+              <g>
+                {/* Header line */}
+                <text
+                  x={GAME_WIDTH / 2}
+                  y={qualifies && !submitted ? panelY + 168 : panelY + 112}
+                  textAnchor="middle"
+                  fill="#6bb8b0"
+                  fontSize="14"
+                  fontWeight="bold"
+                >
+                  Top 10 Leaderboard
+                </text>
+                <line
+                  x1={panelX + 20}
+                  y1={qualifies && !submitted ? panelY + 174 : panelY + 118}
+                  x2={panelX + panelW - 20}
+                  y2={qualifies && !submitted ? panelY + 174 : panelY + 118}
+                  stroke="rgba(107,184,176,0.3)"
+                  strokeWidth="1"
+                />
+                {leaderboard.map((entry, i) => {
+                  const baseY = (qualifies && !submitted ? panelY + 192 : panelY + 136) + i * 24
+                  return (
+                    <g key={i}>
+                      {/* Rank */}
+                      <text
+                        x={panelX + 35}
+                        y={baseY}
+                        textAnchor="end"
+                        fill="rgba(255,255,255,0.5)"
+                        fontSize="13"
+                      >
+                        {i + 1}.
+                      </text>
+                      {/* Name */}
+                      <text
+                        x={panelX + 45}
+                        y={baseY}
+                        fill="white"
+                        fontSize="13"
+                        fontWeight="bold"
+                      >
+                        {entry.name}
+                      </text>
+                      {/* Score */}
+                      <text
+                        x={panelX + panelW - 30}
+                        y={baseY}
+                        textAnchor="end"
+                        fill="#f0d0e8"
+                        fontSize="13"
+                      >
+                        {capScore(entry.score)}
+                      </text>
+                    </g>
+                  )
+                })}
+              </g>
+            )}
+
+            {leaderboard && leaderboard.length === 0 && !leaderboardLoading && (
+              <text
+                x={GAME_WIDTH / 2} y={panelY + 130}
+                textAnchor="middle"
+                fill="rgba(255,255,255,0.5)"
+                fontSize="13"
+              >
+                No scores yet. Be the first!
+              </text>
+            )}
 
             {/* Restart button */}
             <rect
-              x={GAME_WIDTH / 2 - 60} y={280}
-              width={120} height={40}
+              x={GAME_WIDTH / 2 - 60}
+              y={panelY + panelH - 50}
+              width={120} height={36}
               rx="10"
               fill="#7ab87a"
               className="restart-btn"
+              onMouseDown={handleRestartClick}
+              onTouchStart={handleRestartClick}
             />
             <text
-              x={GAME_WIDTH / 2} y={305}
+              x={GAME_WIDTH / 2}
+              y={panelY + panelH - 26}
               textAnchor="middle"
               fill="white"
-              fontSize="16"
+              fontSize="15"
               fontWeight="bold"
               pointerEvents="none"
             >
-              Restart
+              Play Again
             </text>
           </g>
         )}
