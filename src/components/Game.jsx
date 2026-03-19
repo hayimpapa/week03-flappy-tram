@@ -383,11 +383,8 @@ export default function Game() {
   const scaledW = GAME_WIDTH * scale
   const scaledH = GAME_HEIGHT * scale
 
-  // Leaderboard panel dimensions
-  const panelX = GAME_WIDTH / 2 - 150
-  const panelW = 300
-  const panelY = 60
-  const panelH = 480
+  // Whether to show the name entry row
+  const showNameEntry = qualifies && !submitted && !leaderboardLoading && !leaderboardError
 
   return (
     <div
@@ -396,313 +393,188 @@ export default function Game() {
       onMouseDown={handleTap}
       onTouchStart={handleTap}
     >
-      <svg
-        ref={svgRef}
-        width={scaledW}
-        height={scaledH}
-        viewBox={`0 0 ${GAME_WIDTH} ${GAME_HEIGHT}`}
-        className="game-svg"
-      >
-        <Background scrollX={displayState.scrollX} />
+      <div className="game-wrapper" style={{ width: scaledW, height: scaledH, position: 'relative' }}>
+        <svg
+          ref={svgRef}
+          width={scaledW}
+          height={scaledH}
+          viewBox={`0 0 ${GAME_WIDTH} ${GAME_HEIGHT}`}
+          className="game-svg"
+        >
+          <Background scrollX={displayState.scrollX} />
 
-        {displayState.obstacles.map((obs, i) => (
-          <Obstacle key={i} x={obs.x} gapY={obs.gapY} gapSize={obs.gapSize} />
-        ))}
+          {displayState.obstacles.map((obs, i) => (
+            <Obstacle key={i} x={obs.x} gapY={obs.gapY} gapSize={obs.gapSize} />
+          ))}
 
-        <Tram
-          x={TRAM_X}
-          y={displayState.tramY}
-          velocity={displayState.tramVelocity}
-          frameCount={displayState.frameCount}
-        />
+          <Tram
+            x={TRAM_X}
+            y={displayState.tramY}
+            velocity={displayState.tramVelocity}
+            frameCount={displayState.frameCount}
+          />
 
-        {/* Score */}
-        {gameState !== GAME_STATES.IDLE && (
-          <>
-            <text
-              x={GAME_WIDTH / 2} y={45}
-              textAnchor="middle"
-              fill="white"
-              fontSize="36"
-              fontWeight="bold"
-              stroke="rgba(0,0,0,0.3)"
-              strokeWidth="2"
-              paintOrder="stroke"
-            >
-              {capScore(score)}
-            </text>
-            <text
-              x={GAME_WIDTH - 10} y={30}
-              textAnchor="end"
-              fill="rgba(255,255,255,0.6)"
-              fontSize="14"
-              fontWeight="bold"
-            >
-              Best: {capScore(highScore)}
-            </text>
-          </>
-        )}
-
-        {/* Start screen */}
-        {gameState === GAME_STATES.IDLE && (
-          <g>
-            <rect x={GAME_WIDTH / 2 - 130} y={100} width={260} height={70} rx="12" fill="rgba(60,40,80,0.75)" />
-            <text
-              x={GAME_WIDTH / 2} y={132}
-              textAnchor="middle"
-              fill="#f0d0e8"
-              fontSize="30"
-              fontWeight="bold"
-            >
-              Flappy Tram
-            </text>
-            <text
-              x={GAME_WIDTH / 2} y={155}
-              textAnchor="middle"
-              fill="rgba(255,255,255,0.7)"
-              fontSize="12"
-            >
-              Melbourne, Australia
-            </text>
-
-            <rect x={GAME_WIDTH / 2 - 110} y={200} width={220} height={36} rx="8" fill="rgba(60,40,80,0.6)" />
-            <text
-              x={GAME_WIDTH / 2} y={223}
-              textAnchor="middle"
-              fill="rgba(255,255,255,0.8)"
-              fontSize="14"
-            >
-              Tap or press Space to start
-            </text>
-
-            {highScore > 0 && (
+          {/* Score */}
+          {gameState !== GAME_STATES.IDLE && (
+            <>
               <text
-                x={GAME_WIDTH / 2} y={260}
+                x={GAME_WIDTH / 2} y={45}
                 textAnchor="middle"
-                fill="rgba(255,255,255,0.5)"
-                fontSize="13"
+                fill="white"
+                fontSize="36"
+                fontWeight="bold"
+                stroke="rgba(0,0,0,0.3)"
+                strokeWidth="2"
+                paintOrder="stroke"
               >
-                High Score: {capScore(highScore)}
+                {capScore(score)}
               </text>
-            )}
-          </g>
-        )}
-
-        {/* Game over screen with leaderboard */}
-        {gameState === GAME_STATES.GAME_OVER && (
-          <g>
-            {/* Panel background */}
-            <rect x={panelX} y={panelY} width={panelW} height={panelH} rx="15" fill="rgba(40,30,60,0.92)" />
-
-            {/* Game Over title */}
-            <text
-              x={GAME_WIDTH / 2} y={panelY + 32}
-              textAnchor="middle"
-              fill="#f0d0e8"
-              fontSize="24"
-              fontWeight="bold"
-            >
-              Game Over
-            </text>
-
-            {/* Score */}
-            <text
-              x={GAME_WIDTH / 2} y={panelY + 60}
-              textAnchor="middle"
-              fill="white"
-              fontSize="16"
-            >
-              Score: {capScore(score)}
-            </text>
-            <text
-              x={GAME_WIDTH / 2} y={panelY + 80}
-              textAnchor="middle"
-              fill="rgba(255,255,255,0.7)"
-              fontSize="13"
-            >
-              Best: {capScore(Math.max(highScore, score))}
-            </text>
-
-            {/* Leaderboard section */}
-            {leaderboardLoading && (
               <text
-                x={GAME_WIDTH / 2} y={panelY + 120}
-                textAnchor="middle"
+                x={GAME_WIDTH - 10} y={30}
+                textAnchor="end"
                 fill="rgba(255,255,255,0.6)"
-                fontSize="13"
+                fontSize="14"
+                fontWeight="bold"
               >
-                Loading leaderboard...
+                Best: {capScore(highScore)}
               </text>
-            )}
+            </>
+          )}
 
-            {leaderboardError && !leaderboard && (
+          {/* Start screen */}
+          {gameState === GAME_STATES.IDLE && (
+            <g>
+              <rect x={GAME_WIDTH / 2 - 130} y={100} width={260} height={70} rx="12" fill="rgba(60,40,80,0.75)" />
               <text
-                x={GAME_WIDTH / 2} y={panelY + 120}
+                x={GAME_WIDTH / 2} y={132}
                 textAnchor="middle"
-                fill="rgba(255,200,200,0.8)"
-                fontSize="13"
+                fill="#f0d0e8"
+                fontSize="30"
+                fontWeight="bold"
               >
-                Leaderboard unavailable
+                Flappy Tram
               </text>
-            )}
+              <text
+                x={GAME_WIDTH / 2} y={155}
+                textAnchor="middle"
+                fill="rgba(255,255,255,0.7)"
+                fontSize="12"
+              >
+                Melbourne, Australia
+              </text>
 
-            {/* Name entry for qualifying scores */}
-            {qualifies && !submitted && !leaderboardLoading && !leaderboardError && (
-              <g>
+              <rect x={GAME_WIDTH / 2 - 110} y={200} width={220} height={36} rx="8" fill="rgba(60,40,80,0.6)" />
+              <text
+                x={GAME_WIDTH / 2} y={223}
+                textAnchor="middle"
+                fill="rgba(255,255,255,0.8)"
+                fontSize="14"
+              >
+                Tap or press Space to start
+              </text>
+
+              {highScore > 0 && (
                 <text
-                  x={GAME_WIDTH / 2} y={panelY + 108}
+                  x={GAME_WIDTH / 2} y={260}
                   textAnchor="middle"
-                  fill="#e8c840"
+                  fill="rgba(255,255,255,0.5)"
                   fontSize="13"
-                  fontWeight="bold"
                 >
-                  You made the top 10!
+                  High Score: {capScore(highScore)}
                 </text>
-                <foreignObject
-                  x={GAME_WIDTH / 2 - 95}
-                  y={panelY + 114}
-                  width={130}
-                  height={28}
-                >
-                  <input
-                    xmlns="http://www.w3.org/1999/xhtml"
-                    type="text"
-                    maxLength={5}
-                    value={nameInput}
-                    onChange={(e) => {
-                      const val = e.target.value.toUpperCase().replace(/\s/g, '').substring(0, 5)
-                      setNameInput(val)
-                    }}
-                    onKeyDown={(e) => e.stopPropagation()}
-                    onMouseDown={(e) => e.stopPropagation()}
-                    onTouchStart={(e) => e.stopPropagation()}
-                    placeholder="NAME"
-                    className="leaderboard-input"
-                  />
-                </foreignObject>
-                <rect
-                  x={GAME_WIDTH / 2 + 40}
-                  y={panelY + 115}
-                  width={56}
-                  height={26}
-                  rx="6"
-                  fill={submitting ? '#5a8a5a' : '#7ab87a'}
-                  className="restart-btn"
-                  onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); submitScore() }}
-                  onTouchStart={(e) => { e.preventDefault(); e.stopPropagation(); submitScore() }}
-                />
-                <text
-                  x={GAME_WIDTH / 2 + 68}
-                  y={panelY + 133}
-                  textAnchor="middle"
-                  fill="white"
-                  fontSize="12"
-                  fontWeight="bold"
-                  pointerEvents="none"
-                >
-                  {submitting ? '...' : 'Submit'}
-                </text>
-              </g>
-            )}
+              )}
+            </g>
+          )}
+        </svg>
 
-            {/* Leaderboard table */}
-            {leaderboard && leaderboard.length > 0 && (
-              <g>
-                {/* Header line */}
-                <text
-                  x={GAME_WIDTH / 2}
-                  y={qualifies && !submitted ? panelY + 168 : panelY + 112}
-                  textAnchor="middle"
-                  fill="#6bb8b0"
-                  fontSize="14"
-                  fontWeight="bold"
-                >
-                  Top 10 Leaderboard
-                </text>
-                <line
-                  x1={panelX + 20}
-                  y1={qualifies && !submitted ? panelY + 174 : panelY + 118}
-                  x2={panelX + panelW - 20}
-                  y2={qualifies && !submitted ? panelY + 174 : panelY + 118}
-                  stroke="rgba(107,184,176,0.3)"
-                  strokeWidth="1"
-                />
-                {leaderboard.map((entry, i) => {
-                  const baseY = (qualifies && !submitted ? panelY + 192 : panelY + 136) + i * 24
-                  return (
-                    <g key={i}>
-                      {/* Rank */}
-                      <text
-                        x={panelX + 35}
-                        y={baseY}
-                        textAnchor="end"
-                        fill="rgba(255,255,255,0.5)"
-                        fontSize="13"
-                      >
-                        {i + 1}.
-                      </text>
-                      {/* Name */}
-                      <text
-                        x={panelX + 45}
-                        y={baseY}
-                        fill="white"
-                        fontSize="13"
-                        fontWeight="bold"
-                      >
-                        {entry.name}
-                      </text>
-                      {/* Score */}
-                      <text
-                        x={panelX + panelW - 30}
-                        y={baseY}
-                        textAnchor="end"
-                        fill="#f0d0e8"
-                        fontSize="13"
-                      >
-                        {capScore(entry.score)}
-                      </text>
-                    </g>
-                  )
-                })}
-              </g>
-            )}
+        {/* Game over HTML overlay */}
+        {gameState === GAME_STATES.GAME_OVER && (
+          <div
+            className="gameover-overlay"
+            onMouseDown={(e) => e.stopPropagation()}
+            onTouchStart={(e) => e.stopPropagation()}
+          >
+            <div className="gameover-panel">
+              <div className="gameover-title">Game Over</div>
+              <div className="gameover-score">Score: {capScore(score)}</div>
+              <div className="gameover-best">Best: {capScore(Math.max(highScore, score))}</div>
 
-            {leaderboard && leaderboard.length === 0 && !leaderboardLoading && (
-              <text
-                x={GAME_WIDTH / 2} y={panelY + 130}
-                textAnchor="middle"
-                fill="rgba(255,255,255,0.5)"
-                fontSize="13"
+              {leaderboardLoading && (
+                <div className="gameover-status">Loading leaderboard...</div>
+              )}
+
+              {leaderboardError && !leaderboard && (
+                <div className="gameover-status gameover-error">Leaderboard unavailable</div>
+              )}
+
+              {/* Name entry for qualifying scores */}
+              {showNameEntry && (
+                <div className="gameover-qualify">
+                  <div className="gameover-qualify-msg">You made the top 10!</div>
+                  <form
+                    className="gameover-name-form"
+                    onSubmit={(e) => { e.preventDefault(); submitScore() }}
+                  >
+                    <input
+                      type="text"
+                      maxLength={5}
+                      autoComplete="off"
+                      autoCorrect="off"
+                      autoCapitalize="characters"
+                      spellCheck={false}
+                      value={nameInput}
+                      onChange={(e) => {
+                        const val = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').substring(0, 5)
+                        setNameInput(val)
+                      }}
+                      onKeyDown={(e) => e.stopPropagation()}
+                      placeholder="NAME"
+                      className="leaderboard-input"
+                      autoFocus
+                    />
+                    <button
+                      type="submit"
+                      className="gameover-submit-btn"
+                      disabled={submitting || !nameInput.trim()}
+                    >
+                      {submitting ? '...' : 'Submit'}
+                    </button>
+                  </form>
+                </div>
+              )}
+
+              {/* Leaderboard table */}
+              {leaderboard && leaderboard.length > 0 && (
+                <div className="gameover-leaderboard">
+                  <div className="gameover-lb-title">Top 10 Leaderboard</div>
+                  <div className="gameover-lb-divider" />
+                  <div className="gameover-lb-list">
+                    {leaderboard.map((entry, i) => (
+                      <div key={i} className="gameover-lb-row">
+                        <span className="gameover-lb-rank">{i + 1}.</span>
+                        <span className="gameover-lb-name">{entry.name}</span>
+                        <span className="gameover-lb-score">{capScore(entry.score)}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {leaderboard && leaderboard.length === 0 && !leaderboardLoading && (
+                <div className="gameover-status">No scores yet. Be the first!</div>
+              )}
+
+              <button
+                className="gameover-restart-btn"
+                onMouseDown={handleRestartClick}
+                onTouchStart={handleRestartClick}
               >
-                No scores yet. Be the first!
-              </text>
-            )}
-
-            {/* Restart button */}
-            <rect
-              x={GAME_WIDTH / 2 - 60}
-              y={panelY + panelH - 50}
-              width={120} height={36}
-              rx="10"
-              fill="#7ab87a"
-              className="restart-btn"
-              onMouseDown={handleRestartClick}
-              onTouchStart={handleRestartClick}
-            />
-            <text
-              x={GAME_WIDTH / 2}
-              y={panelY + panelH - 26}
-              textAnchor="middle"
-              fill="white"
-              fontSize="15"
-              fontWeight="bold"
-              pointerEvents="none"
-            >
-              Play Again
-            </text>
-          </g>
+                Play Again
+              </button>
+            </div>
+          </div>
         )}
-      </svg>
+      </div>
     </div>
   )
 }
