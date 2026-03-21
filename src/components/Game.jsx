@@ -60,6 +60,7 @@ export default function Game() {
   const frameCountRef = useRef(0)
   const animFrameRef = useRef(null)
   const lastTimeRef = useRef(0)
+  const gameOverTimeRef = useRef(0)
 
   // Handle container resize
   useEffect(() => {
@@ -178,6 +179,7 @@ export default function Game() {
   const handleGameOver = useCallback(() => {
     gameStateRef.current = GAME_STATES.GAME_OVER
     setGameState(GAME_STATES.GAME_OVER)
+    gameOverTimeRef.current = Date.now()
     playCollisionSound()
     const finalScore = scoreRef.current
     const hs = getHighScore()
@@ -350,10 +352,12 @@ export default function Game() {
 
   // Input handlers
   useEffect(() => {
+    const RESTART_COOLDOWN_MS = 1500
     const handleKeyDown = (e) => {
       if (e.code === 'Space' || e.code === 'ArrowUp') {
         e.preventDefault()
         if (gameStateRef.current === GAME_STATES.GAME_OVER) {
+          if (Date.now() - gameOverTimeRef.current < RESTART_COOLDOWN_MS) return
           restart()
         } else {
           flap()
@@ -376,6 +380,7 @@ export default function Game() {
   const handleRestartClick = useCallback((e) => {
     e.preventDefault()
     e.stopPropagation()
+    if (Date.now() - gameOverTimeRef.current < 1500) return
     restart()
   }, [restart])
 
