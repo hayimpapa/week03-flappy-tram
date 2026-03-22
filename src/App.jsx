@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { Analytics } from '@vercel/analytics/react'
 import Game from './components/Game.jsx'
 import AboutThisBuild from './components/AboutThisBuild.jsx'
 import './App.css'
@@ -38,6 +39,7 @@ export default function App() {
       <div className="tab-content">
         {activeTab === 'game' ? <Game /> : <AboutThisBuild />}
       </div>
+      <Analytics />
     </div>
   )
 }
