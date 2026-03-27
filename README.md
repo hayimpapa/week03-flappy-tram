@@ -7,11 +7,12 @@ A Flappy Bird clone set in Melbourne, Australia. Fly a classic W-class tram thro
 ## Features
 
 - Classic Flappy Bird mechanics with Melbourne theming
-- Parallax scrolling background featuring Eureka Tower, Rialto, Arts Centre spire, and Flinders Street Station
-- All visuals are code-generated SVG — no external image assets
-- Web Audio API sound effects (tram bell ding, collision)
+- Parallax scrolling background image featuring Melbourne landmarks (Eureka Tower, Rialto, Arts Centre spire, Flinders Street Station)
+- Tram, obstacles, ground, and UI drawn with code-generated SVG
+- Web Audio API sound effects (flap, score ding, collision) — no audio files
 - Difficulty scaling: speed increases every 10 points, gap shrinks every 20 points
 - High score saved to localStorage
+- Online leaderboard (top 10 scores via Supabase)
 - Works on desktop (keyboard) and mobile (tap)
 - "About This Build" page with editable sections saved to localStorage
 
@@ -28,6 +29,7 @@ Then open [http://localhost:5173](http://localhost:5173) in your browser.
 
 ```bash
 npm run build
+npm run preview   # preview the production build locally
 ```
 
 Output is in the `dist/` folder, ready to deploy to Vercel or any static host.
@@ -41,13 +43,16 @@ Output is in the `dist/` folder, ready to deploy to Vercel or any static host.
 ## Tech Stack
 
 - React 18 + Vite
-- SVG rendering (all visuals drawn in code)
+- SVG rendering for tram, obstacles, ground, and UI
+- PNG background image (`public/melbourne.png`) for the Melbourne skyline
 - Web Audio API (generated tones, no audio files)
+- Supabase for online leaderboard
+- Vercel Analytics
 - localStorage for high scores and about page content
 
-## Note on Assets
+## Assets
 
-All visuals in this game are generated entirely with SVG elements in React components. There are no external image files, sprites, or downloaded assets. The Melbourne skyline, tram, obstacles, and UI are all drawn programmatically.
+The tram, obstacles (tram stop poles), ground, and all UI elements are generated entirely with SVG in React components. The Melbourne skyline background is a PNG image (`public/melbourne.png`) used for parallax scrolling.
 
 ## Prompts
 
