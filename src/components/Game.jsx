@@ -61,6 +61,7 @@ export default function Game() {
   const animFrameRef = useRef(null)
   const lastTimeRef = useRef(0)
   const gameOverTimeRef = useRef(0)
+  const lastTouchTimeRef = useRef(0)
 
   // Handle container resize
   useEffect(() => {
@@ -370,6 +371,11 @@ export default function Game() {
 
   const handleTap = useCallback((e) => {
     e.preventDefault()
+    if (e.type === 'mousedown') {
+      if (Date.now() - lastTouchTimeRef.current < 500) return
+    } else {
+      lastTouchTimeRef.current = Date.now()
+    }
     if (gameStateRef.current === GAME_STATES.GAME_OVER) {
       // Don't restart on tap if interacting with leaderboard UI
       return
@@ -380,6 +386,11 @@ export default function Game() {
   const handleRestartClick = useCallback((e) => {
     e.preventDefault()
     e.stopPropagation()
+    if (e.type === 'mousedown') {
+      if (Date.now() - lastTouchTimeRef.current < 500) return
+    } else {
+      lastTouchTimeRef.current = Date.now()
+    }
     if (Date.now() - gameOverTimeRef.current < 1500) return
     restart()
   }, [restart])
