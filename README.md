@@ -25,6 +25,16 @@ npm run dev
 
 Then open [http://localhost:5173](http://localhost:5173) in your browser.
 
+## Required Environment Variables
+
+Set these on Vercel (and locally in `.env.local` if you run the API):
+
+- `SUPABASE_URL`
+- `SUPABASE_SERVICE_ROLE_KEY` (service role key, never exposed to the client)
+- `SCORE_SIGNING_SECRET` — any random 32+ character string. Used by the API to
+  HMAC-sign per-game session tokens so submitted scores can be verified as
+  having come from a real play session.
+
 ## Build for Production
 
 ```bash

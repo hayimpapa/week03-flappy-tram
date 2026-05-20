@@ -62,6 +62,7 @@ export default function Game() {
   const lastTimeRef = useRef(0)
   const gameOverTimeRef = useRef(0)
   const lastTouchTimeRef = useRef(0)
+  const sessionTokenRef = useRef(null)
 
   // Handle container resize
   useEffect(() => {
@@ -100,12 +101,15 @@ export default function Game() {
     if (!nameInput.trim() || submitting) return
     setSubmitting(true)
     try {
+      const token = await sessionTokenRef.current
+      if (!token) throw new Error('Missing session token')
       const res = await fetch('/api/scores', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: nameInput.trim().substring(0, 5).toUpperCase().replace(/\s/g, ''),
           score: capScore(scoreRef.current),
+          token,
         }),
       })
       if (!res.ok) throw new Error('Failed to submit')
@@ -165,6 +169,10 @@ export default function Game() {
       resetGame()
       gameStateRef.current = GAME_STATES.PLAYING
       setGameState(GAME_STATES.PLAYING)
+      sessionTokenRef.current = fetch('/api/scores?action=start', { method: 'POST' })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((d) => d?.token || null)
+        .catch(() => null)
       // Spawn initial obstacles
       obstaclesRef.current = [
         spawnObstacle(GAME_WIDTH + 100),
